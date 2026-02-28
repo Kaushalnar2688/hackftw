@@ -41,7 +41,7 @@ Do not include any conversational text or markdown blocks.
 `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,3 +81,4 @@ Do not include any conversational text or markdown blocks.
     res.status(500).json({ error: "Server error", details: err.message });
   }
 }
+
