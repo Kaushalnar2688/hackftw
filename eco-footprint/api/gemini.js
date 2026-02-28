@@ -14,16 +14,29 @@ export default async function handler(req, res) {
 
     // Prepare prompt for Gemini API
     const prompt = `
-You are a home energy expert. Analyze this data: ${JSON.stringify(body)}. 
-Return ONLY a JSON object following this schema: 
-{ 
-  "score": number, 
-  "grade": string, 
-  "estimatedKgCO2PerYear": number, 
-  "summary": string, 
-  "breakdown": [{"area": string, "score": number, "note": string}], 
-  "tips": [{"title": string, "description": string, "priority": string, "estimatedSaving": string}] 
-}. 
+You are a home energy and carbon footprint expert. Analyze the following household data:
+
+${JSON.stringify(body)}
+
+Return a **single valid JSON object only** (no markdown, no explanations) following exactly this schema:
+
+{
+  "score": number,                       // overall efficiency score 0-100
+  "grade": string,                        // e.g., "Excellent", "Good", "Fair", "Poor"
+  "estimatedKgCO2PerYear": number,        // annual CO₂ in kg
+  "summary": string,                       // short overall summary
+  "breakdown": [                           // per area scores
+    { "area": string, "score": number, "note": string }
+  ],
+  "tips": [                                // actionable improvement suggestions
+    { "title": string, "description": string, "priority": string, "estimatedSaving": string }
+  ]
+}
+
+- Only return JSON, nothing else.
+- Fill all fields; if no data, use null or empty string/array.
+- Ensure numbers are numbers, strings are strings.
+- Make tips practical and realistic.
 Do not include any conversational text or markdown blocks.
 `;
 
