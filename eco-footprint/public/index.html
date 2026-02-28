@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Eco Footprint Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="Clario.css" />
+</head>
+<body>
+
+<h1>🌱 Eco Footprint Calculator</h1>
+
+<section id="formSection">
+  <form id="ecoForm">
+
+    <h2>Electricity</h2>
+
+    <label>
+      Provider Type
+      <select id="provider">
+        <option value="grid">Grid</option>
+        <option value="renewable">Renewable</option>
+      </select>
+    </label>
+
+    <label>
+      Monthly Bill ($)
+      <input id="elecBill" type="number" required />
+    </label>
+
+    <label>
+      Solar Panels?
+      <select id="solar">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </label>
+
+    <label>
+      Turn devices off standby?
+      <select id="standby">
+        <option value="rarely">Rarely</option>
+        <option value="sometimes">Sometimes</option>
+        <option value="always">Always</option>
+      </select>
+    </label>
+
+    <label>
+      Household size
+      <input id="people" type="number" required />
+    </label>
+
+    <label>
+      Home size (sq ft)
+      <input id="homeSize" type="number" required />
+    </label>
+
+    <h2>Heating</h2>
+
+    <label>
+      Heating Type
+      <select id="heatingType">
+        <option value="gas">Gas</option>
+        <option value="electric">Electric</option>
+        <option value="heat-pump">Heat Pump</option>
+      </select>
+    </label>
+
+    <label>
+      Thermostat (°C)
+      <input id="thermostat" type="number" required />
+    </label>
+
+    <label>
+      Insulation
+      <select id="insulation">
+        <option value="poor">Poor</option>
+        <option value="average">Average</option>
+        <option value="good">Good</option>
+      </select>
+    </label>
+
+    <label>
+      Shower length (minutes)
+      <input id="showerLen" type="number" required />
+    </label>
+
+    <label>
+      Baths per week
+      <input id="baths" type="number" required />
+    </label>
+
+    <button id="analyseBtn" type="submit">
+      ⚡ Calculate My Footprint
+    </button>
+
+  </form>
+</section>
+
+<section id="loading" class="hidden">
+  <h2>⏳ Analysing…</h2>
+</section>
+
+<section id="results" class="hidden">
+  <div class="card">
+    <h2>
+      Score: <span id="scoreNum"></span> —
+      <span id="scoreGrade"></span>
+    </h2>
+    <p id="summaryText"></p>
+  </div>
+
+  <div class="card">
+    <h2>Impact Breakdown</h2>
+    <div id="impactBars"></div>
+  </div>
+
+  <div class="card">
+    <h2>Top Tips</h2>
+    <div id="tipsList"></div>
+  </div>
+
+  <button id="resetBtn">🔄 Start Over</button>
+</section>
+
+<script src="Clario.js"></script>
+</body>
+</html>
