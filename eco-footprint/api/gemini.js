@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is missing in env variables" });
+      return res.status(500).json({ error: "GROQ_API_KEY is missing in env variables" });
     }
 
     const body = req.body;
@@ -50,20 +50,29 @@ Rules:
 - Only return JSON, nothing else.
 `;
 
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 1200,
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a carbon footprint expert. You only respond with valid raw JSON, never markdown or explanation.'
+          },
+          {
+            role: 'user',
+            content: prompt
           }
-        }),
-      }
-    );
+        ],
+        temperature: 0.3,
+        max_tokens: 1200,
+        response_format: { type: 'json_object' }  // forces pure JSON output
+      })
+    });
 
     if (!response.ok) {
       const text = await response.text();
@@ -94,4 +103,5 @@ Rules:
     res.status(500).json({ error: "Server error", details: err.message });
   }
 }
+
 
