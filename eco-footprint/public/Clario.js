@@ -19,6 +19,11 @@ function getFormData() {
       insulation: $('insulation').value,
       showerMinutes: Number($('showerLen').value),
       bathsPerWeek: Number($('baths').value),
+    },
+    recycling: {
+      recyclingHabit: $('recycling')?.value || 'none',
+      composting: $('compost')?.value || 'none',
+      electronicsFreq: $('electronics')?.value || 'none',
     }
   };
 }
@@ -39,7 +44,9 @@ $('ecoForm').addEventListener('submit', async e => {
     hide('loading');
     show('results');
     render(data);
+
   } catch (err) {
+    console.error(err);
     alert('Error: ' + err.message);
     hide('loading');
     show('formSection');
@@ -47,19 +54,14 @@ $('ecoForm').addEventListener('submit', async e => {
 });
 
 function render(data) {
-  $('scoreNum').textContent = data.score;
-  $('scoreGrade').textContent = data.grade;
-  $('summaryText').textContent =
-    `Estimated ${data.estimatedKgCO2PerYear} kg CO₂/year. ${data.summary}`;
+  $('scoreNum').textContent = data.score || '?';
+  $('scoreGrade').textContent = data.grade || 'N/A';
+  $('summaryText').textContent = `Est. ~${data.estimatedKgCO2PerYear || '?'} kg CO₂/year. ${data.summary || ''}`;
 
   const bars = $('impactBars');
   bars.innerHTML = '';
-  data.breakdown.forEach(b => {
-    const color =
-      b.score >= 70 ? '#4ade80' :
-      b.score >= 45 ? '#fbbf24' :
-      '#f87171';
-
+  (data.breakdown || []).forEach(b => {
+    const color = b.score >= 70 ? '#4ade80' : b.score >= 45 ? '#fbbf24' : '#f87171';
     bars.innerHTML += `
       <div>
         <strong>${b.area} (${b.score}/100)</strong>
@@ -72,9 +74,9 @@ function render(data) {
 
   const tips = $('tipsList');
   tips.innerHTML = '';
-  data.tips.forEach(t => {
+  (data.tips || []).forEach(t => {
     tips.innerHTML += `
-      <div class="tip ${t.priority}">
+      <div class="tip ${t.priority?.toLowerCase() || 'low'}">
         <strong>${t.title}</strong><br>
         ${t.description}<br>
         <em>${t.estimatedSaving || ''}</em>
