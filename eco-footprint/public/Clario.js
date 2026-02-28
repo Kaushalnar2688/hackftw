@@ -34,7 +34,7 @@ $('ecoForm').addEventListener('submit', async e => {
   show('loading');
 
   try {
-    const res = await fetch('/api/gemini', {
+    const res = await fetch('/api/gemini.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(getFormData())
@@ -88,3 +88,4 @@ $('resetBtn').addEventListener('click', () => {
   hide('results');
   show('formSection');
 });
+
