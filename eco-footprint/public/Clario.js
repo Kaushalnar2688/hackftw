@@ -6,6 +6,38 @@ const $ = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
 
+// ══════════════════════════════════════
+//  THEME SWITCHER
+// ══════════════════════════════════════
+const THEMES = ['dark', 'light', 'cb'];
+const themeButtons = {
+  dark:  $('themeDark'),
+  light: $('themeLight'),
+  cb:    $('themeCb'),
+};
+
+function setTheme(theme) {
+  document.body.dataset.theme = theme;
+  localStorage.setItem('ecoscope-theme', theme);
+  Object.entries(themeButtons).forEach(([t, btn]) => {
+    btn.classList.toggle('active', t === theme);
+  });
+  // Re-render results bars with new colours if results are visible
+  if (!$('results').classList.contains('hidden')) {
+    document.querySelectorAll('.cmp-fill, .bar-fill').forEach(b => {
+      if (b.dataset.w) b.style.width = b.dataset.w;
+    });
+  }
+}
+
+// Load saved preference or default to dark
+const savedTheme = localStorage.getItem('ecoscope-theme') || 'dark';
+setTheme(savedTheme);
+
+$('themeDark').onclick  = () => setTheme('dark');
+$('themeLight').onclick = () => setTheme('light');
+$('themeCb').onclick    = () => setTheme('cb');
+
 // ── NAVIGATION ──
 $('startBtn').onclick = () => { hide('landing'); show('progressWrap'); goStep(1); };
 $('back1').onclick   = () => { hide('step1'); hide('progressWrap'); show('landing'); };
@@ -204,19 +236,27 @@ function render({ score, grade, totalKg, totalT, summary, cats, tips }) {
   $('rCO2').textContent   = `~${totalT} tonnes CO₂e per year (${Math.round(totalKg).toLocaleString()} kg)`;
   $('rSummary').textContent = summary;
 
+  // Theme-aware colours
+  const theme = document.body.dataset.theme || 'dark';
+  const palette = theme === 'cb'
+    ? { good: '#4d9fff', warn: '#ffd700', bad: '#e07b00' }
+    : theme === 'light'
+    ? { good: '#2e8b2e', warn: '#d4870a', bad: '#c0392b' }
+    : { good: '#5db85d', warn: '#ffc94d', bad: '#ff6b6b' };
+
   // Animate score ring
   const ring  = $('ringCircle');
   const circ  = 377;
-  const col   = score >= 65 ? '#5db85d' : score >= 45 ? '#ffc94d' : '#ff6b6b';
+  const col   = score >= 65 ? palette.good : score >= 45 ? palette.warn : palette.bad;
   ring.style.stroke = col;
   setTimeout(() => { ring.style.strokeDashoffset = circ - (score / 100) * circ; }, 80);
 
   // Comparison chart
   const comparisons = [
     { lbl: 'You',       kg: totalKg, col },
-    { lbl: 'World Avg', kg: 4700,    col: '#5db85d' },
-    { lbl: 'EU Avg',    kg: 7200,    col: '#ffc94d' },
-    { lbl: 'US Avg',    kg: 14000,   col: '#ff6b6b' },
+    { lbl: 'World Avg', kg: 4700,    col: palette.good },
+    { lbl: 'EU Avg',    kg: 7200,    col: palette.warn },
+    { lbl: 'US Avg',    kg: 14000,   col: palette.bad  },
   ];
   const maxKg = Math.max(...comparisons.map(c => c.kg)) * 1.05;
   $('compareBars').innerHTML = comparisons.map(c => `
@@ -232,7 +272,7 @@ function render({ score, grade, totalKg, totalT, summary, cats, tips }) {
   const maxCat = Math.max(...cats.map(c => c.kg));
   $('breakdownBars').innerHTML = cats.map(c => {
     const pct  = maxCat > 0 ? (c.kg / maxCat * 100).toFixed(1) : 0;
-    const col2 = c.kg < 500 ? '#5db85d' : c.kg < 1500 ? '#ffc94d' : '#ff6b6b';
+    const col2 = c.kg < 500 ? palette.good : c.kg < 1500 ? palette.warn : palette.bad;
     return `<div class="bar-row">
       <div class="bar-top"><strong>${c.icon} ${c.name}</strong><span>${Math.round(c.kg).toLocaleString()} kg</span></div>
       <div class="bar-track"><div class="bar-fill" style="background:${col2}" data-w="${pct}%"></div></div>
