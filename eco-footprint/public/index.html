@@ -2,127 +2,313 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Eco Footprint Calculator</title>
+  <title>EcoScope — Carbon Footprint</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="Clario.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="eco.css" />
 </head>
 <body>
 
-<h1>🌱 Eco Footprint Calculator</h1>
+<!-- Background -->
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
 
-<section id="formSection">
-  <form id="ecoForm">
-
-    <h2>Electricity</h2>
-
-    <label>
-      Provider Type
-      <select id="provider">
-        <option value="grid">Grid</option>
-        <option value="renewable">Renewable</option>
-      </select>
-    </label>
-
-    <label>
-      Monthly Bill ($)
-      <input id="elecBill" type="number" required />
-    </label>
-
-    <label>
-      Solar Panels?
-      <select id="solar">
-        <option value="no">No</option>
-        <option value="yes">Yes</option>
-      </select>
-    </label>
-
-    <label>
-      Turn devices off standby?
-      <select id="standby">
-        <option value="rarely">Rarely</option>
-        <option value="sometimes">Sometimes</option>
-        <option value="always">Always</option>
-      </select>
-    </label>
-
-    <label>
-      Household size
-      <input id="people" type="number" required />
-    </label>
-
-    <label>
-      Home size (sq ft)
-      <input id="homeSize" type="number" required />
-    </label>
-
-    <h2>Heating</h2>
-
-    <label>
-      Heating Type
-      <select id="heatingType">
-        <option value="gas">Gas</option>
-        <option value="electric">Electric</option>
-        <option value="heat-pump">Heat Pump</option>
-      </select>
-    </label>
-
-    <label>
-      Thermostat (°C)
-      <input id="thermostat" type="number" required />
-    </label>
-
-    <label>
-      Insulation
-      <select id="insulation">
-        <option value="poor">Poor</option>
-        <option value="average">Average</option>
-        <option value="good">Good</option>
-      </select>
-    </label>
-
-    <label>
-      Shower length (minutes)
-      <input id="showerLen" type="number" required />
-    </label>
-
-    <label>
-      Baths per week
-      <input id="baths" type="number" required />
-    </label>
-
-    <button id="analyseBtn" type="submit">
-      ⚡ Calculate My Footprint
-    </button>
-
-  </form>
-</section>
-
-<section id="loading" class="hidden">
-  <h2>⏳ Analysing…</h2>
-</section>
-
-<section id="results" class="hidden">
-  <div class="card">
-    <h2>
-      Score: <span id="scoreNum"></span> —
-      <span id="scoreGrade"></span>
-    </h2>
-    <p id="summaryText"></p>
+<!-- Header -->
+<header>
+  <div class="logo">
+    <span class="leaf">🌿</span>
+    <span>EcoScope</span>
   </div>
+  <p class="tagline">Understand your planet impact in minutes</p>
+</header>
 
-  <div class="card">
-    <h2>Impact Breakdown</h2>
-    <div id="impactBars"></div>
+<!-- Progress Bar -->
+<div class="progress-wrap hidden" id="progressWrap">
+  <div class="progress-steps">
+    <div class="step active" data-step="1"><span>01</span> Energy</div>
+    <div class="step" data-step="2"><span>02</span> Heating</div>
+    <div class="step" data-step="3"><span>03</span> Lifestyle</div>
   </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
 
-  <div class="card">
-    <h2>Top Tips</h2>
-    <div id="tipsList"></div>
-  </div>
+<!-- Form Sections -->
+<main>
 
-  <button id="resetBtn">🔄 Start Over</button>
-</section>
+  <!-- Landing -->
+  <section id="landing" class="panel">
+    <div class="landing-content">
+      <h1>How green<br><em>is your home?</em></h1>
+      <p>Answer a few quick questions about your household habits. We'll calculate your carbon footprint and give you personalised tips.</p>
+      <button class="btn-primary" id="startBtn">Get Started →</button>
+    </div>
+    <div class="landing-visual">
+      <div class="globe">
+        <div class="globe-ring"></div>
+        <div class="globe-ring r2"></div>
+        <div class="globe-ring r3"></div>
+        <span class="globe-emoji">🌍</span>
+      </div>
+    </div>
+  </section>
 
-<script src="Clario.js"></script>
+  <!-- Step 1: Electricity -->
+  <section id="step1" class="panel hidden">
+    <form id="ecoForm">
+      <div class="step-header">
+        <span class="step-label">Step 01 / 03</span>
+        <h2>Your Energy Use</h2>
+        <p>Tell us about your electricity setup at home.</p>
+      </div>
+
+      <div class="q-grid">
+        <div class="q-block full">
+          <div class="q-label">Where does your electricity come from?</div>
+          <div class="pill-group" data-id="provider">
+            <label class="pill"><input type="radio" name="provider" value="grid" required><span>🏭 Standard Grid</span></label>
+            <label class="pill"><input type="radio" name="provider" value="green-tariff"><span>🌱 Green Tariff</span></label>
+            <label class="pill"><input type="radio" name="provider" value="renewable"><span>☀️ Fully Renewable</span></label>
+          </div>
+        </div>
+
+        <div class="q-block full">
+          <div class="q-label">How would you describe your monthly electricity bill?</div>
+          <div class="pill-group" data-id="elecBill">
+            <label class="pill"><input type="radio" name="elecBill" value="very-low" required><span>💚 Very Low (&lt;$50)</span></label>
+            <label class="pill"><input type="radio" name="elecBill" value="low"><span>🟢 Low ($50–100)</span></label>
+            <label class="pill"><input type="radio" name="elecBill" value="moderate"><span>🟡 Moderate ($100–200)</span></label>
+            <label class="pill"><input type="radio" name="elecBill" value="high"><span>🔴 High ($200+)</span></label>
+          </div>
+        </div>
+
+        <div class="q-block">
+          <div class="q-label">Do you have solar panels?</div>
+          <div class="pill-group" data-id="solar">
+            <label class="pill"><input type="radio" name="solar" value="yes" required><span>Yes ☀️</span></label>
+            <label class="pill"><input type="radio" name="solar" value="no"><span>No</span></label>
+            <label class="pill"><input type="radio" name="solar" value="partial"><span>Partial</span></label>
+          </div>
+        </div>
+
+        <div class="q-block">
+          <div class="q-label">Do you switch devices off standby?</div>
+          <div class="pill-group" data-id="standby">
+            <label class="pill"><input type="radio" name="standby" value="always" required><span>Always ✅</span></label>
+            <label class="pill"><input type="radio" name="standby" value="sometimes"><span>Sometimes</span></label>
+            <label class="pill"><input type="radio" name="standby" value="rarely"><span>Rarely ❌</span></label>
+          </div>
+        </div>
+
+        <div class="q-block">
+          <div class="q-label">How many people live in your home?</div>
+          <div class="pill-group" data-id="people">
+            <label class="pill"><input type="radio" name="people" value="1" required><span>Just me</span></label>
+            <label class="pill"><input type="radio" name="people" value="2"><span>2 people</span></label>
+            <label class="pill"><input type="radio" name="people" value="3-4"><span>3–4 people</span></label>
+            <label class="pill"><input type="radio" name="people" value="5+"><span>5+ people</span></label>
+          </div>
+        </div>
+
+        <div class="q-block">
+          <div class="q-label">How large is your home?</div>
+          <div class="pill-group" data-id="homeSize">
+            <label class="pill"><input type="radio" name="homeSize" value="small" required><span>🏠 Small (&lt;800 sqft)</span></label>
+            <label class="pill"><input type="radio" name="homeSize" value="medium"><span>🏡 Medium (800–2000)</span></label>
+            <label class="pill"><input type="radio" name="homeSize" value="large"><span>🏘️ Large (2000+)</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" id="back1">← Back</button>
+        <button type="button" class="btn-primary" id="next1">Continue →</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Step 2: Heating -->
+  <section id="step2" class="panel hidden">
+    <div class="step-header">
+      <span class="step-label">Step 02 / 03</span>
+      <h2>Heating & Water</h2>
+      <p>How you heat your home makes a big difference.</p>
+    </div>
+
+    <div class="q-grid">
+      <div class="q-block full">
+        <div class="q-label">What's your primary heating source?</div>
+        <div class="pill-group" data-id="heatingType">
+          <label class="pill"><input type="radio" name="heatingType" value="gas" required><span>🔥 Natural Gas</span></label>
+          <label class="pill"><input type="radio" name="heatingType" value="electric"><span>⚡ Electric</span></label>
+          <label class="pill"><input type="radio" name="heatingType" value="heat-pump"><span>🌡️ Heat Pump</span></label>
+          <label class="pill"><input type="radio" name="heatingType" value="oil"><span>🛢️ Oil / Propane</span></label>
+        </div>
+      </div>
+
+      <div class="q-block full">
+        <div class="q-label">How warm do you keep your home in winter?</div>
+        <div class="pill-group" data-id="thermostat">
+          <label class="pill"><input type="radio" name="thermostat" value="cool" required><span>❄️ Cool (below 18°C)</span></label>
+          <label class="pill"><input type="radio" name="thermostat" value="comfortable"><span>😊 Comfortable (18–21°C)</span></label>
+          <label class="pill"><input type="radio" name="thermostat" value="warm"><span>🌡️ Warm (21–24°C)</span></label>
+          <label class="pill"><input type="radio" name="thermostat" value="hot"><span>🔥 Hot (24°C+)</span></label>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">How well insulated is your home?</div>
+        <div class="pill-group" data-id="insulation">
+          <label class="pill"><input type="radio" name="insulation" value="excellent" required><span>🟢 Excellent</span></label>
+          <label class="pill"><input type="radio" name="insulation" value="good"><span>🟡 Good</span></label>
+          <label class="pill"><input type="radio" name="insulation" value="average"><span>🟠 Average</span></label>
+          <label class="pill"><input type="radio" name="insulation" value="poor"><span>🔴 Poor</span></label>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">How long are your showers?</div>
+        <div class="pill-group" data-id="showerLen">
+          <label class="pill"><input type="radio" name="showerLen" value="short" required><span>⚡ Under 5 min</span></label>
+          <label class="pill"><input type="radio" name="showerLen" value="medium"><span>⏱ 5–10 min</span></label>
+          <label class="pill"><input type="radio" name="showerLen" value="long"><span>🛁 10–20 min</span></label>
+          <label class="pill"><input type="radio" name="showerLen" value="very-long"><span>💧 20+ min</span></label>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">How often do you take baths?</div>
+        <div class="pill-group" data-id="baths">
+          <label class="pill"><input type="radio" name="baths" value="never" required><span>Never</span></label>
+          <label class="pill"><input type="radio" name="baths" value="rarely"><span>Rarely</span></label>
+          <label class="pill"><input type="radio" name="baths" value="weekly"><span>Weekly</span></label>
+          <label class="pill"><input type="radio" name="baths" value="multiple"><span>Multiple/week</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn-secondary" id="back2">← Back</button>
+      <button type="button" class="btn-primary" id="next2">Continue →</button>
+    </div>
+  </section>
+
+  <!-- Step 3: Lifestyle -->
+  <section id="step3" class="panel hidden">
+    <div class="step-header">
+      <span class="step-label">Step 03 / 03</span>
+      <h2>Lifestyle & Recycling</h2>
+      <p>Small habits add up to a big difference.</p>
+    </div>
+
+    <div class="q-grid">
+      <div class="q-block full">
+        <div class="q-label">How often do you recycle household waste?</div>
+        <div class="pill-group" data-id="recycling">
+          <label class="pill"><input type="radio" name="recycling" value="always" required><span>♻️ Always</span></label>
+          <label class="pill"><input type="radio" name="recycling" value="mostly"><span>Mostly</span></label>
+          <label class="pill"><input type="radio" name="recycling" value="sometimes"><span>Sometimes</span></label>
+          <label class="pill"><input type="radio" name="recycling" value="rarely"><span>Rarely</span></label>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">Do you compost food waste?</div>
+        <div class="pill-group" data-id="compost">
+          <label class="pill"><input type="radio" name="compost" value="yes" required><span>🌱 Yes</span></label>
+          <label class="pill"><input type="radio" name="compost" value="sometimes"><span>Sometimes</span></label>
+          <label class="pill"><input type="radio" name="compost" value="no"><span>No</span></label>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">How often do you buy new electronics?</div>
+        <div class="pill-group" data-id="electronics">
+          <label class="pill"><input type="radio" name="electronics" value="rarely" required><span>Rarely</span></label>
+          <label class="pill"><input type="radio" name="electronics" value="yearly"><span>Yearly</span></label>
+          <label class="pill"><input type="radio" name="electronics" value="frequently"><span>Frequently</span></label>
+        </div>
+      </div>
+
+      <div class="q-block full">
+        <div class="q-label">How would you describe your diet?</div>
+        <div class="pill-group" data-id="diet">
+          <label class="pill"><input type="radio" name="diet" value="vegan" required><span>🥦 Vegan</span></label>
+          <label class="pill"><input type="radio" name="diet" value="vegetarian"><span>🥗 Vegetarian</span></label>
+          <label class="pill"><input type="radio" name="diet" value="flexitarian"><span>🍳 Flexitarian</span></label>
+          <label class="pill"><input type="radio" name="diet" value="meat-daily"><span>🥩 Meat Daily</span></label>
+        </div>
+      </div>
+
+      <div class="q-block full">
+        <div class="q-label">How do you typically get around?</div>
+        <div class="pill-group" data-id="transport">
+          <label class="pill"><input type="radio" name="transport" value="walk-cycle" required><span>🚲 Walk/Cycle</span></label>
+          <label class="pill"><input type="radio" name="transport" value="public"><span>🚌 Public Transit</span></label>
+          <label class="pill"><input type="radio" name="transport" value="ev"><span>⚡ Electric Car</span></label>
+          <label class="pill"><input type="radio" name="transport" value="car"><span>🚗 Petrol/Diesel Car</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn-secondary" id="back3">← Back</button>
+      <button type="button" class="btn-primary" id="submitBtn">🌿 Calculate My Impact</button>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section id="loading" class="panel hidden">
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <h2>Analysing your footprint…</h2>
+      <p>Our AI is crunching your data</p>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="panel hidden">
+
+    <div class="results-hero">
+      <div class="score-ring-wrap">
+        <svg class="score-ring" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#1a2a1a" stroke-width="10"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke-width="10"
+                  stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327"
+                  id="scoreCircle" style="transition:stroke-dashoffset 1.5s ease;"/>
+        </svg>
+        <div class="score-inner">
+          <span class="score-num" id="scoreNum">—</span>
+          <span class="score-label">/ 100</span>
+        </div>
+      </div>
+      <div class="results-headline">
+        <h2 id="scoreGrade">—</h2>
+        <p id="summaryText"></p>
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <div class="card" id="breakdownCard">
+        <h3>📊 Impact Breakdown</h3>
+        <div id="impactBars"></div>
+      </div>
+      <div class="card" id="tipsCard">
+        <h3>💡 Top Tips</h3>
+        <div id="tipsList"></div>
+      </div>
+    </div>
+
+    <button class="btn-reset" id="resetBtn">🔄 Start Over</button>
+  </section>
+
+</main>
+
+<script src="eco.js"></script>
 </body>
 </html>
