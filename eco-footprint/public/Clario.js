@@ -142,7 +142,7 @@ function getFormData() {
 // ---- Submit to API ----
 async function submit() {
   try {
-    const res = await fetch('/api/groq', {
+    const res = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(getFormData())
@@ -214,5 +214,6 @@ function render(data) {
     tips.appendChild(div);
   });
 }
+
 
 
