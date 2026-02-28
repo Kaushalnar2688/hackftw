@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: "Only POST allowed" });
   }
@@ -12,68 +11,82 @@ export default async function handler(req, res) {
 
     const body = req.body;
 
-    // Prepare prompt for Gemini API
     const prompt = `
-You are a home energy and carbon footprint expert. Analyze the following household data:
+You are a home energy and carbon footprint expert. Analyze the following household data (all inputs are qualitative descriptors):
 
-${JSON.stringify(body)}
+${JSON.stringify(body, null, 2)}
+
+Guidelines for interpreting qualitative values:
+- Electricity bill: "very-low" = ~$40/mo, "low" = ~$75/mo, "moderate" = ~$150/mo, "high" = ~$250/mo
+- Household size: "1" = 1 person, "2" = 2 people, "3-4" = 3-4 people, "5+" = 5+ people
+- Home size: "small" = ~600 sqft, "medium" = ~1400 sqft, "large" = ~2500 sqft
+- Thermostat: "cool" = 17°C, "comfortable" = 20°C, "warm" = 22°C, "hot" = 25°C
+- Shower: "short" = 4 min, "medium" = 7 min, "long" = 15 min, "very-long" = 25 min
+- Baths/week: "never" = 0, "rarely" = 1, "weekly" = 2, "multiple" = 4
+- Diet impact: vegan < vegetarian < flexitarian < meat-daily
+- Transport: walk-cycle and public-transit are low carbon, ev is moderate, car is high
 
 Return a **single valid JSON object only** (no markdown, no explanations) following exactly this schema:
-
 {
-  "score": number,                       // overall efficiency score 0-100
-  "grade": string,                        // e.g., "Excellent", "Good", "Fair", "Poor"
-  "estimatedKgCO2PerYear": number,        // annual CO₂ in kg
-  "summary": string,                       // short overall summary
-  "breakdown": [                           // per area scores
+  "score": number,
+  "grade": string,
+  "estimatedKgCO2PerYear": number,
+  "summary": string,
+  "breakdown": [
     { "area": string, "score": number, "note": string }
   ],
-  "tips": [                                // actionable improvement suggestions
+  "tips": [
     { "title": string, "description": string, "priority": string, "estimatedSaving": string }
   ]
 }
 
+Rules:
+- score: 0–100 where 100 is best (lowest carbon footprint)
+- grade: one of "Excellent", "Good", "Fair", "Needs Improvement", "Poor"
+- estimatedKgCO2PerYear: realistic annual CO₂ estimate in kg (typical UK/US household is 5000–15000 kg)
+- breakdown: 4–5 areas (e.g. "Electricity", "Heating", "Water", "Lifestyle", "Transport")
+- tips: 4–6 practical tips, each with priority "high", "medium", or "low"
+- estimatedSaving: e.g. "Save ~400 kg CO₂/year" or "Save ~$120/year"
 - Only return JSON, nothing else.
-- Fill all fields; if no data, use null or empty string/array.
-- Ensure numbers are numbers, strings are strings.
-- Make tips practical and realistic.
-Do not include any conversational text or markdown blocks.
 `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 1200,
+          }
+        }),
       }
     );
 
-    // Handle errors from Gemini API
     if (!response.ok) {
-      const text = await response.text(); // get raw text to debug
+      const text = await response.text();
       console.error("Gemini API error:", text);
       return res.status(500).json({ error: "Gemini API returned an error", details: text });
     }
 
-    // Parse Gemini JSON
     const data = await response.json();
-
-    // Extract raw text from response (depends on Gemini structure)
     let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
     if (!rawText) {
       return res.status(500).json({ error: "Gemini API response missing expected text" });
     }
 
-    // Robust JSON parsing
+    // Strip markdown code blocks if present
+    rawText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return res.status(500).json({ error: "Gemini API returned invalid JSON" });
+      return res.status(500).json({ error: "Gemini API returned invalid JSON", raw: rawText });
     }
 
     const result = JSON.parse(jsonMatch[0]);
-
-    // Return final JSON to frontend
     res.status(200).json(result);
 
   } catch (err) {
@@ -81,4 +94,3 @@ Do not include any conversational text or markdown blocks.
     res.status(500).json({ error: "Server error", details: err.message });
   }
 }
-
